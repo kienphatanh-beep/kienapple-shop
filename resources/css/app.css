@@ -1,0 +1,109 @@
+/* resources/css/app.css
+   -----------------------------------------
+   - Dán thẳng file này vào project Laravel của bạn
+   - Nhớ import trong resources/js/app.js: import '../css/app.css';
+   - Chạy: npm install (nếu chưa) -> npm run dev
+*/
+
+/* Google font (tùy chọn) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+/* Tailwind directives */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---------------------------
+   Base styles (global)
+   --------------------------- */
+@layer base {
+  html, body {
+    height: 100%;
+  }
+
+  body {
+    font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    background-color: theme('colors.gray.100');
+    color: theme('colors.gray.900');
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Link default */
+  a { @apply text-yellow-700 hover:underline; }
+}
+
+/* ---------------------------
+   Components (reusable)
+   --------------------------- */
+@layer components {
+  /* button chung */
+  .btn {
+    @apply inline-flex items-center justify-center px-4 py-2 rounded-full font-medium shadow-sm transition;
+  }
+  .btn-primary { @apply bg-yellow-400 hover:bg-yellow-500 text-black; }
+  .btn-ghost { @apply bg-transparent border border-gray-200 text-gray-700 hover:bg-gray-50; }
+
+  /* Banner nhỏ ở trên */
+  .site-banner {
+    @apply w-full text-center py-2 font-bold text-white;
+    /* màu nền tạm, bằng utility bên dưới có animation */
+  }
+
+  /* Header container */
+  .site-header {
+    @apply bg-yellow-400 shadow-md;
+  }
+
+  /* Search input */
+  .site-search {
+    @apply w-full py-2 pl-4 pr-10 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-yellow-500;
+  }
+
+  /* Menu item */
+  .menu-item { @apply px-4 py-2 hover:text-yellow-700 transition; }
+
+  /* Logo nhỏ */
+  .logo-sm { @apply h-10; }
+}
+
+/* ---------------------------
+   Utilities & Animations
+   --------------------------- */
+@layer utilities {
+  /* subtle float/pulse */
+  .animate-spotlight { animation: spotlight 3s ease-in-out infinite; }
+  @keyframes spotlight {
+    0% { transform: translateY(0); filter: brightness(1); }
+    50% { transform: translateY(-2px); filter: brightness(1.06); }
+    100% { transform: translateY(0); filter: brightness(1); }
+  }
+
+  /* animated horizontal gradient for banner */
+  .bg-animated-gradient {
+    background: linear-gradient(90deg, #b45309 10%, #f59e0b 40%, #f97316 70%);
+    background-size: 200% 100%;
+    animation: gradient-x 6s linear infinite;
+  }
+  @keyframes gradient-x {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  /* utility nhỏ cho text màu brand */
+  .text-yellow-brand { color: #b45309; }
+
+  /* utility: hidden trên mobile (vd dùng cho menu desktop) */
+  .hide-mobile { @apply hidden md:block; }
+  .show-mobile { @apply block md:hidden; }
+}
+
+/* ---------------------------
+   Responsive tweaks (example)
+   --------------------------- */
+@media (max-width: 768px) {
+  @layer components {
+    .site-header { @apply py-2; }
+  }
+}
