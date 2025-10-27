@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: kienapple-store
+    name: kienapple-shop
     env: docker
     plan: free
     dockerfilePath: ./Dockerfile
@@ -11,3 +11,4 @@ services:
         value: false
       - key: APP_KEY
         generateValue: true
+    postDeployCommand: "php artisan migrate --force"
