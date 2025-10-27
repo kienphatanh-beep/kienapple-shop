@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install pdo pdo_mysql pdo_pgsql mbstring zip bcmath gd
 
 # ------------------------------
-# 2️⃣ Increase PHP memory limit to avoid OOM (Out of Memory)
+# 2️⃣ Increase PHP memory limit (avoid OOM)
 # ------------------------------
 RUN echo "memory_limit = -1" > /usr/local/etc/php/conf.d/memory-limit.ini
 
@@ -30,23 +30,24 @@ WORKDIR /var/www
 COPY . .
 
 # ------------------------------
-# 6️⃣ Set permissions
+# 6️⃣ Fix permissions
 # ------------------------------
 RUN mkdir -p /root/.composer && chmod -R 777 /root/.composer /var/www
 
 # ------------------------------
-# 7️⃣ Clear composer cache and update to latest version
+# 7️⃣ Update composer & clear cache
 # ------------------------------
 RUN composer self-update && composer clear-cache
 
 # ------------------------------
-# 8️⃣ Install PHP dependencies safely (ignore scripts to prevent Artisan errors)
+# 8️⃣ Install PHP dependencies safely
+# (Skip artisan scripts during build)
 # ------------------------------
 RUN COMPOSER_MEMORY_LIMIT=-1 composer install \
     --prefer-dist --no-dev --no-progress --no-interaction --optimize-autoloader --no-scripts
 
 # ------------------------------
-# 9️⃣ Clear Laravel caches (ignore errors if .env not ready)
+# 9️⃣ Clear Laravel caches safely (ignore if .env not ready)
 # ------------------------------
 RUN php artisan config:clear || true && \
     php artisan route:clear || true && \
@@ -58,6 +59,6 @@ RUN php artisan config:clear || true && \
 EXPOSE 8080
 
 # ------------------------------
-# 11️⃣ Start Laravel using built-in PHP server
+# 11️⃣ Start Laravel and auto-migrate before serving
 # ------------------------------
-CMD php artisan serve --host=0.0.0.0 --port=$PORT
+CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=$PORT
