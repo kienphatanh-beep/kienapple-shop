@@ -1,17 +1,14 @@
 <x-layout-user>
 <div class="min-h-screen bg-gradient-to-br from-yellow-200 via-yellow-300 to-yellow-400 py-12 relative overflow-hidden">
-
-    <!-- 🌟 Hiệu ứng lấp lánh -->
     <canvas id="sparkleCanvas" class="absolute inset-0 w-full h-full pointer-events-none z-0"></canvas>
 
     <div class="max-w-6xl mx-auto relative z-10">
-        <form action="{{ route('cart.processCheckout') }}" method="POST">
+        <form action="{{ route('cart.processCheckout') }}" method="POST" id="checkoutForm">
             @csrf
             <div class="grid md:grid-cols-3 gap-6">
 
                 <!-- 🛒 Giỏ hàng -->
                 <div class="md:col-span-2 bg-white/90 backdrop-blur-md rounded-2xl shadow-xl p-6 transform transition hover:scale-[1.01] hover:shadow-2xl">
-
                     <div class="flex justify-between items-center mb-6">
                         <h1 class="text-3xl font-extrabold text-gray-800 flex items-center gap-3">
                             🛍️ Giỏ hàng của bạn
@@ -19,8 +16,6 @@
                                 {{ count($cart) }} sản phẩm
                             </span>
                         </h1>
-
-                        <!-- 🔘 Chọn tất cả -->
                         <div class="flex items-center gap-2 text-sm font-semibold text-gray-700">
                             <input type="checkbox" id="selectAll" class="accent-yellow-500 w-5 h-5 cursor-pointer">
                             <label for="selectAll">Chọn tất cả</label>
@@ -35,7 +30,6 @@
                             $itemTotal = $price * ($item['quantity'] ?? 1);
                         @endphp
 
-                        <!-- 🔹 Một sản phẩm -->
                         <div class="flex items-center justify-between py-4 border-b border-gray-200 group hover:bg-yellow-50 transition rounded-xl relative">
 
                             <!-- Checkbox -->
@@ -54,16 +48,16 @@
 
                             <!-- Số lượng -->
                             <div class="flex items-center gap-1">
-                                <form action="{{ route('cart.update') }}" method="POST" class="flex items-center gap-1">
-                                    @csrf
-                                    <input type="hidden" name="id" value="{{ $item['product_id'] }}">
-                                    <button type="submit" name="quantity" value="{{ max(1, ($item['quantity'] ?? 1) - 1) }}"
-                                            class="px-3 py-1 bg-yellow-300 hover:bg-yellow-400 rounded shadow text-lg font-bold">−</button>
-                                    <input type="text" readonly value="{{ $item['quantity'] ?? 1 }}"
-                                           class="w-10 text-center bg-gray-100 border rounded shadow font-semibold">
-                                    <button type="submit" name="quantity" value="{{ ($item['quantity'] ?? 1) + 1 }}"
-                                            class="px-3 py-1 bg-yellow-300 hover:bg-yellow-400 rounded shadow text-lg font-bold">+</button>
-                                </form>
+                                <button type="button"
+                                        class="qty-btn px-3 py-1 bg-yellow-300 hover:bg-yellow-400 rounded shadow text-lg font-bold"
+                                        data-id="{{ $item['product_id'] }}"
+                                        data-quantity="{{ max(1, ($item['quantity'] ?? 1) - 1) }}">−</button>
+                                <input type="text" readonly value="{{ $item['quantity'] ?? 1 }}"
+                                       class="w-10 text-center bg-gray-100 border rounded shadow font-semibold">
+                                <button type="button"
+                                        class="qty-btn px-3 py-1 bg-yellow-300 hover:bg-yellow-400 rounded shadow text-lg font-bold"
+                                        data-id="{{ $item['product_id'] }}"
+                                        data-quantity="{{ ($item['quantity'] ?? 1) + 1 }}">+</button>
                             </div>
 
                             <!-- Giá -->
@@ -83,7 +77,9 @@
                                         {{ number_format($price_root, 0, ',', '.') }}đ
                                     </div>
                                 @endif
-                                <div class="text-xs text-gray-600">Tổng: {{ number_format($itemTotal, 0, ',', '.') }}đ</div>
+                                <div class="text-xs text-gray-600 item-total">
+                                    Tổng: {{ number_format($itemTotal, 0, ',', '.') }}đ
+                                </div>
                             </div>
 
                             <!-- Xoá -->
@@ -138,7 +134,7 @@
     </div>
 </div>
 
-{{-- 💰 Tổng tiền realtime + chọn tất cả --}}
+{{-- 💰 Tính tổng realtime --}}
 <script>
 const checkboxes = document.querySelectorAll('.product-checkbox');
 const totalDisplay = document.getElementById('cart-total-display');
@@ -149,7 +145,7 @@ function updateTotal() {
     checkboxes.forEach(cb => {
         if (cb.checked) {
             const row = cb.closest('.flex');
-            const text = row.querySelector('.text-xs.text-gray-600').innerText.match(/[\d.,]+/g);
+            const text = row.querySelector('.item-total').innerText.match(/[\d.,]+/g);
             if (text && text[0]) {
                 const itemTotal = parseFloat(text[0].replace(/[.,]/g, '')) || 0;
                 total += itemTotal;
@@ -159,12 +155,33 @@ function updateTotal() {
     totalDisplay.textContent = new Intl.NumberFormat('vi-VN').format(total) + 'đ';
 }
 
-// Chọn tất cả
 selectAll?.addEventListener('change', e => {
     checkboxes.forEach(cb => cb.checked = e.target.checked);
     updateTotal();
 });
 checkboxes.forEach(cb => cb.addEventListener('change', updateTotal));
+</script>
+
+{{-- 🔄 Cập nhật số lượng bằng AJAX --}}
+<script>
+document.querySelectorAll('.qty-btn').forEach(btn => {
+    btn.addEventListener('click', async e => {
+        const id = btn.dataset.id;
+        const quantity = btn.dataset.quantity;
+        const token = "{{ csrf_token() }}";
+
+        const res = await fetch("{{ route('cart.update') }}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": token,
+            },
+            body: JSON.stringify({ id, quantity }),
+        });
+
+        if (res.ok) location.reload();
+    });
+});
 </script>
 
 {{-- 🌟 Hiệu ứng lấp lánh --}}

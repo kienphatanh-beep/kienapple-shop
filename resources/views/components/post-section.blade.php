@@ -20,9 +20,10 @@
                class="post-card group bg-white rounded-2xl shadow-md hover:shadow-2xl border border-yellow-100 transition-all duration-500 overflow-hidden relative hover:-translate-y-2 hover:border-yellow-300">
 
                 <div class="relative overflow-hidden">
-                    <img src="{{ asset('assets/images/post/' . $post->thumbnail) }}"
-                         alt="{{ $post->title }}"
-                         class="w-full h-48 object-cover transform group-hover:scale-110 transition-transform duration-700 ease-out">
+                  <img src="{!! htmlspecialchars_decode($post->thumbnail) !!}"
+     alt="{{ $post->title }}"
+     class="w-full h-48 object-cover transform group-hover:scale-110 transition-transform duration-700 ease-out">
+
                     <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
                 </div>
 
@@ -41,15 +42,7 @@
         @endforeach
     </div>
 
-    <!-- 💫 Nút xem thêm -->
-    <div class="mt-10 text-center">
-        <button id="moreBtn"
-                class="relative overflow-hidden inline-flex items-center gap-2 px-7 py-3 bg-yellow-400 text-yellow-900 font-semibold rounded-full shadow-md hover:shadow-lg transition-all duration-300 hover:bg-yellow-300 active:scale-95">
-            <span>Xem thêm</span>
-            <i class="fas fa-arrow-right text-sm transition-transform duration-300 group-hover:translate-x-1"></i>
-            <span class="ripple absolute inset-0 bg-yellow-200/40 rounded-full opacity-0"></span>
-        </button>
-    </div>
+
 </section>
 
 <!-- 💅 CSS -->

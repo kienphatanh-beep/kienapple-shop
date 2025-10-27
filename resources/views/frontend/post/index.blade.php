@@ -32,59 +32,71 @@
 
             <!-- 🖼️ Bài viết nổi bật -->
             @if($posts->count())
-            <div class="relative rounded-2xl overflow-hidden mb-10">
-                @php $featured = $posts->first(); @endphp
-                <a href="{{ route('post.show', $featured->slug) }}">
-                    <img src="{{ asset('assets/images/post/' . $featured->thumbnail) }}" 
-                        alt="{{ $featured->title }}" 
-                        class="w-full h-80 object-cover rounded-2xl">
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent"></div>
-                    <div class="absolute bottom-6 left-6 text-white">
-                        <h2 class="text-2xl md:text-3xl font-extrabold mb-2">
-                            {{ $featured->title }}
-                        </h2>
-                        <p class="text-sm md:text-base text-white/90 w-3/4">
-                            {{ Str::limit($featured->description, 120) }}
-                        </p>
-                    </div>
-                </a>
-            </div>
+                @php
+                    $featured = $posts->first();
+                    $featuredThumb = html_entity_decode($featured->thumbnail);
+                    $featuredImg = Str::startsWith($featuredThumb, ['http://', 'https://'])
+                        ? $featuredThumb
+                        : asset('assets/images/post/' . $featuredThumb);
+                @endphp
+                <div class="relative rounded-2xl overflow-hidden mb-10">
+                    <a href="{{ route('post.show', $featured->slug) }}">
+                        <img src="{{ $featuredImg }}" 
+                             alt="{{ $featured->title }}" 
+                             class="w-full h-80 object-cover rounded-2xl">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent"></div>
+                        <div class="absolute bottom-6 left-6 text-white">
+                            <h2 class="text-2xl md:text-3xl font-extrabold mb-2">
+                                {{ $featured->title }}
+                            </h2>
+                            <p class="text-sm md:text-base text-white/90 w-3/4">
+                                {{ Str::limit($featured->description, 120) }}
+                            </p>
+                        </div>
+                    </a>
+                </div>
             @endif
 
             <!-- 🧩 Danh sách bài viết -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                 @foreach($posts->skip(1) as $post)
-                <a href="{{ route('post.show', $post->slug) }}" 
-                class="post-card block bg-white rounded-2xl overflow-hidden 
-                       shadow hover:shadow-lg border border-gray-100 
-                       transition-all duration-300 hover:-translate-y-1 group">
-                    <div class="relative overflow-hidden">
-                        <img src="{{ asset('assets/images/post/' . $post->thumbnail) }}" 
-                            alt="{{ $post->title }}" 
-                            class="w-full h-52 object-cover transform group-hover:scale-105 
-                                   transition-transform duration-700 ease-out">
-                        <div class="absolute inset-0 bg-gradient-to-t 
-                                    from-black/40 via-transparent to-transparent opacity-0 
-                                    group-hover:opacity-100 transition-all duration-500"></div>
-                    </div>
-                    <div class="p-5">
-                        <h3 class="text-lg font-bold text-gray-800 line-clamp-2 
-                                   group-hover:text-yellow-600 transition-colors">
-                            {{ $post->title }}
-                        </h3>
-                        <p class="text-gray-600 text-sm mt-2 line-clamp-3">
-                            {{ Str::limit($post->description, 100, '...') }}
-                        </p>
-                        <div class="mt-3 flex justify-between items-center text-sm text-gray-500">
-                            <span>
-                                <i class="far fa-calendar-alt mr-1"></i>{{ $post->created_at->format('d/m/Y') }}
-                            </span>
-                            <span class="text-yellow-600 font-semibold hover:text-yellow-700 transition">
-                                <i class="fas fa-arrow-right"></i>
-                            </span>
+                    @php
+                        $thumb = html_entity_decode($post->thumbnail);
+                        $imgSrc = Str::startsWith($thumb, ['http://', 'https://'])
+                            ? $thumb
+                            : asset('assets/images/post/' . $thumb);
+                    @endphp
+                    <a href="{{ route('post.show', $post->slug) }}" 
+                       class="post-card block bg-white rounded-2xl overflow-hidden 
+                              shadow hover:shadow-lg border border-gray-100 
+                              transition-all duration-300 hover:-translate-y-1 group">
+                        <div class="relative overflow-hidden">
+                            <img src="{{ $imgSrc }}" 
+                                 alt="{{ $post->title }}" 
+                                 class="w-full h-52 object-cover transform group-hover:scale-105 
+                                        transition-transform duration-700 ease-out">
+                            <div class="absolute inset-0 bg-gradient-to-t 
+                                        from-black/40 via-transparent to-transparent opacity-0 
+                                        group-hover:opacity-100 transition-all duration-500"></div>
                         </div>
-                    </div>
-                </a>
+                        <div class="p-5">
+                            <h3 class="text-lg font-bold text-gray-800 line-clamp-2 
+                                       group-hover:text-yellow-600 transition-colors">
+                                {{ $post->title }}
+                            </h3>
+                            <p class="text-gray-600 text-sm mt-2 line-clamp-3">
+                                {{ Str::limit($post->description, 100, '...') }}
+                            </p>
+                            <div class="mt-3 flex justify-between items-center text-sm text-gray-500">
+                                <span>
+                                    <i class="far fa-calendar-alt mr-1"></i>{{ $post->created_at->format('d/m/Y') }}
+                                </span>
+                                <span class="text-yellow-600 font-semibold hover:text-yellow-700 transition">
+                                    <i class="fas fa-arrow-right"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </a>
                 @endforeach
             </div>
 
@@ -97,13 +109,13 @@
 
     <!-- 💅 CSS -->
     <style>
-    .line-clamp-2 {
-        display: -webkit-box; -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical; overflow: hidden;
-    }
-    .line-clamp-3 {
-        display: -webkit-box; -webkit-line-clamp: 3;
-        -webkit-box-orient: vertical; overflow: hidden;
-    }
+        .line-clamp-2 {
+            display: -webkit-box; -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical; overflow: hidden;
+        }
+        .line-clamp-3 {
+            display: -webkit-box; -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical; overflow: hidden;
+        }
     </style>
 </x-layout-user>

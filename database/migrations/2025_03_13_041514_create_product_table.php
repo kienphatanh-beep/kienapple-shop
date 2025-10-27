@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('product', function (Blueprint $table) {
@@ -17,25 +14,27 @@ return new class extends Migration
             $table->unsignedInteger('brand_id');
             $table->string('name', 1000);
             $table->string('slug', 1000)->unique();
-            $table->float('price_root');
-            $table->float('price_sale');
+
+            // 💰 Giá chính xác, không bị giới hạn
+            $table->decimal('price_root', 15, 2);
+            $table->decimal('price_sale', 15, 2);
+
             $table->string('thumbnail', 1000)->nullable();
-            $table->unsignedInteger('qty');
-                    $table->unsignedInteger('stock')->default(0)->comment('Số lượng còn trong kho');
-        $table->unsignedInteger('sold')->default(0)->comment('Số lượng đã bán');
+            $table->unsignedInteger('qty')->default(0);
+            $table->unsignedInteger('stock')->default(0)->comment('Số lượng còn trong kho');
+            $table->unsignedInteger('sold')->default(0)->comment('Số lượng đã bán');
+
             $table->longText('detail')->nullable();
             $table->text('description')->nullable();
+
             $table->unsignedInteger('created_by');
             $table->unsignedInteger('updated_by')->nullable();
             $table->timestamps();
             $table->softDeletes('deleted_at');
-            $table->boolean('status');
+            $table->boolean('status')->default(1);
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('product');

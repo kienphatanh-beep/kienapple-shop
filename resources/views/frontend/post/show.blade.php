@@ -19,6 +19,7 @@
             </header>
 
             <!-- 🖼 Ảnh đại diện -->
+        <!-- 🖼 Ảnh đại diện -->
             @if ($post->image)
             <div class="overflow-hidden rounded-2xl mb-10 shadow-sm animate-fadeZoom">
                 <img src="{{ asset('assets/images/post/' . $post->thumbnail) }}" 
@@ -57,23 +58,29 @@
             </h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                 @foreach ($relatedPosts as $related)
-                <a href="{{ route('post.show', $related->slug) }}"
-                   class="related-card bg-white rounded-2xl shadow-sm hover:shadow-xl border border-yellow-100 transition-all duration-500 hover:-translate-y-1 group overflow-hidden">
-                    <div class="relative overflow-hidden">
-                        <img src="{{ asset('assets/images/post/' . $related->thumbnail) }}" 
-                             alt="{{ $related->title }}" 
-                             class="w-full h-48 object-cover transform group-hover:scale-110 transition-transform duration-700 ease-out">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
-                    </div>
-                    <div class="p-5">
-                        <h3 class="text-lg font-semibold text-gray-800 line-clamp-2 group-hover:text-yellow-600 transition">
-                            {{ $related->title }}
-                        </h3>
-                        <p class="text-sm text-gray-600 mt-2 line-clamp-3">
-                            {{ Str::limit($related->description, 100) }}
-                        </p>
-                    </div>
-                </a>
+                    @php
+                        $relatedThumb = html_entity_decode($related->thumbnail);
+                        $relatedImg = Str::startsWith($relatedThumb, ['http://', 'https://'])
+                            ? $relatedThumb
+                            : asset('assets/images/post/' . $relatedThumb);
+                    @endphp
+                    <a href="{{ route('post.show', $related->slug) }}"
+                       class="related-card bg-white rounded-2xl shadow-sm hover:shadow-xl border border-yellow-100 transition-all duration-500 hover:-translate-y-1 group overflow-hidden">
+                        <div class="relative overflow-hidden">
+                            <img src="{{ $relatedImg }}" 
+                                 alt="{{ $related->title }}" 
+                                 class="w-full h-48 object-cover transform group-hover:scale-110 transition-transform duration-700 ease-out">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
+                        </div>
+                        <div class="p-5">
+                            <h3 class="text-lg font-semibold text-gray-800 line-clamp-2 group-hover:text-yellow-600 transition">
+                                {{ $related->title }}
+                            </h3>
+                            <p class="text-sm text-gray-600 mt-2 line-clamp-3">
+                                {{ Str::limit($related->description, 100) }}
+                            </p>
+                        </div>
+                    </a>
                 @endforeach
             </div>
         </section>

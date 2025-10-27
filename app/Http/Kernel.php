@@ -67,4 +67,9 @@ class Kernel extends HttpKernel
         // 👇 thêm alias cho middleware admin
         'admin' => \App\Http\Middleware\AdminMiddleware::class,
     ];
+    protected function schedule(\Illuminate\Console\Scheduling\Schedule $schedule)
+{
+    $schedule->command('rss:fetch')->dailyAt('08:00');
+}
+
 }
