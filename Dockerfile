@@ -1,27 +1,31 @@
-# 1️⃣ Sử dụng PHP + Composer
 FROM php:8.2-fpm
 
-# 2️⃣ Cài extension cần thiết cho Laravel
+# Cài các thư viện hệ thống
 RUN apt-get update && apt-get install -y \
-    git unzip libpq-dev libpng-dev libjpeg-dev libfreetype6-dev \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install pdo pdo_mysql gd
+    git curl unzip libpq-dev libonig-dev libzip-dev zip \
+    && docker-php-ext-install pdo pdo_mysql mbstring zip
 
-# 3️⃣ Cài Composer
+# Tăng bộ nhớ PHP (tránh lỗi Extracting archive)
+RUN echo "memory_limit = -1" > /usr/local/etc/php/conf.d/memory-limit.ini
+
+# Cài composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# 4️⃣ Sao chép source Laravel
-WORKDIR /var/www/html
+WORKDIR /var/www
 COPY . .
 
-# 5️⃣ Cài đặt các package Laravel
-RUN composer install --no-interaction --no-dev --optimize-autoloader
+# Cấp quyền ghi (tránh lỗi permission)
+RUN mkdir -p /root/.composer && chmod -R 777 /root/.composer
+RUN chmod -R 777 /var/www
 
-# 6️⃣ Tạo key và migrate database
-RUN php artisan key:generate || true
+# Cập nhật composer và xóa cache hỏng
+RUN composer self-update && composer clear-cache
 
-# 7️⃣ Mở cổng
-EXPOSE 10000
+# Cài Laravel dependencies an toàn
+RUN composer install --prefer-dist --no-progress --no-interaction --optimize-autoloader
 
-# 8️⃣ Lệnh chạy Laravel
-CMD php artisan serve --host=0.0.0.0 --port=10000
+# Xóa cache cũ của Laravel
+RUN php artisan config:clear && php artisan route:clear && php artisan view:clear
+
+EXPOSE 8080
+CMD php artisan serve --host=0.0.0.0 --port=$PORT
